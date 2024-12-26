@@ -4,6 +4,7 @@ import os
 from prometheus_client import start_http_server, Gauge, CollectorRegistry
 from unas import UNASPro
 from dotenv import load_dotenv
+from utils import gigabytes_to_bytes
 
 registry = CollectorRegistry()
 
@@ -62,7 +63,7 @@ def update_metrics():
         if quota == -1:
             quota = total_storage_kb
         else:
-            quota = quota * 1024 * 1024
+            quota = gigabytes_to_bytes(quota)
         share.labels(name=name, quota=quota).set(s['usage'])
 
     for s in shared_shares:
@@ -71,7 +72,7 @@ def update_metrics():
         if quota == -1:
             quota = total_storage_kb
         else:
-            quota = quota * 1024 * 1024
+            quota = gigabytes_to_bytes(quota)
 
         share.labels(name=name, quota=quota).set(s['usage'])
 
