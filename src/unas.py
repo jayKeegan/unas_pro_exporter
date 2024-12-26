@@ -1,6 +1,7 @@
 import requests
 import os
 import urllib3
+import time
 
 import requests.cookies
 
@@ -20,10 +21,20 @@ class UNASPro:
 
         urllib3.disable_warnings()
 
+        login_retry_frequency = int(os.getenv("LOGIN_RETRY_FREQUENCY", "10"))
+
+        self.request_timeout = int(os.environ.get("REQUEST_TIMEOUT", "10"))
+
         login = self.login()
         if not login:
-            print("Failed to login")
-            exit(1)
+            print(f"Failed to login... trying again every {login_retry_frequency} seconds")
+            while not self.logged_in:
+                login = self.login()
+                if login:
+                    print("Logged in!")
+                else:
+                    print(f"Failed to login... trying again in {login_retry_frequency} seconds")
+                    time.sleep(login_retry_frequency)
 
     def is_logged_in(self):
         return self.logged_in
@@ -140,13 +151,13 @@ class UNASPro:
 
     def make_request(self, method: str, url: str, data: dict = None):
         if method == "GET":
-            response = self.session.get(url, headers=self.headers, verify=False)
+            response = self.session.get(url, headers=self.headers, verify=False, timeout=10)
         elif method == "POST":
-            response = self.session.post(url, headers=self.headers, json=data, verify=False)
+            response = self.session.post(url, headers=self.headers, json=data, verify=False, timeout=10)
         elif method == "PUT":
-            response = self.session.put(url, headers=self.headers, json=data, verify=False)
+            response = self.session.put(url, headers=self.headers, json=data, verify=False, timeout=10)
         elif method == "DELETE":
-            response = self.session.delete(url, headers=self.headers, verify=False)
+            response = self.session.delete(url, headers=self.headers, verify=False, timeout=10)
         else:
             return {"error": "Invalid method"}
 

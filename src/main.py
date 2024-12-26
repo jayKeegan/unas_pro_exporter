@@ -21,7 +21,7 @@ drive_size = Gauge('drive_size', 'Drive Size', registry=registry, labelnames=['s
 total_storage = Gauge('total_storage', 'Total Storage', registry=registry)
 used_storage = Gauge('used_storage', 'Used Storage', registry=registry)
 free_storage = Gauge('free_storage', 'Free Storage', registry=registry)
-share = Gauge('share', 'Share Size', registry=registry, labelnames=['name'])
+share = Gauge('share', 'Share Size', registry=registry, labelnames=['name', 'quota'])
 start_time = Gauge('start_time', 'Start Time', registry=registry)
 network_interface = Gauge('network_interface', 'Network Interface', registry=registry, labelnames=['interface'])
 
@@ -32,6 +32,8 @@ def update_metrics():
         print(f'Error: {e}')
         return
     
+    print(f"Updating metrics for device: \"{system_info['name']}\"")
+        
     cpu_usage_pct = system_info['cpu']['currentload'] * 100
     cpu_temp_c = system_info['cpu']['temperature']
     memory = system_info['memory']
@@ -56,11 +58,22 @@ def update_metrics():
 
     for s in personal_shares:
         name = f'{s['user']['firstName']} {s['user']['lastName']} (Personal)'
-        share.labels(name=name).set(s['usage'])
+        quota = s['storageProfile']['quota']
+        if quota == -1:
+            quota = total_storage_kb
+        else:
+            quota = quota * 1024 * 1024
+        share.labels(name=name, quota=quota).set(s['usage'])
 
     for s in shared_shares:
         name = f'{s['name']}'
-        share.labels(name=name).set(s['usage'])
+        quota = s['quota']
+        if quota == -1:
+            quota = total_storage_kb
+        else:
+            quota = quota * 1024 * 1024
+
+        share.labels(name=name, quota=quota).set(s['usage'])
 
     for interface in network_interfaces:
         network_interface.labels(interface=interface['interface']).set(interface['connected'])
@@ -111,14 +124,18 @@ if __name__ == '__main__':
 
     try:
         device = UNASPro(hostname, username, password)
+        print(f"Connected to {hostname}")
     except Exception as e:
         print(f'Error: {e}')
-        exit(1)
 
     while True:
         logged_in = device.is_logged_in()
-        if not logged_in:
-            device.login()
-        else:
+        if logged_in:
             update_metrics()
+        else:
+            print("Not logged in... trying again")
+            device.login()
+            if device.is_logged_in():
+                print("Logged in!")
+                update_metrics()
         time.sleep(check_frequency)
