@@ -93,6 +93,7 @@ if __name__ == '__main__':
     hostname = os.getenv("DEVICE_HOSTNAME")
     username = os.getenv("DEVICE_USERNAME")
     password = os.getenv("DEVICE_PASSWORD")
+    check_frequency = int(os.getenv("CHECK_FREQUENCY", "5"))
 
     if not hostname or not username or not password:
         missing = []
@@ -120,4 +121,4 @@ if __name__ == '__main__':
             device.login()
         else:
             update_metrics()
-        time.sleep(5)
+        time.sleep(check_frequency)

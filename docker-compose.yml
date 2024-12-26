@@ -11,3 +11,4 @@ services:
       - DEVICE_HOSTNAME=
       - DEVICE_USERNAME=
       - DEVICE_PASSWORD=
+      - CHECK_FREQUENCY=5
