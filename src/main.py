@@ -118,5 +118,6 @@ if __name__ == '__main__':
         logged_in = device.is_logged_in()
         if not logged_in:
             device.login()
-        update_metrics()
+        else:
+            update_metrics()
         time.sleep(5)
