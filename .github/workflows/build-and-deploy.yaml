@@ -49,7 +49,7 @@ jobs:
             --platform linux/amd64,linux/arm64 \
             --cache-from type=local,src=/tmp/.buildx-cache \
             --cache-to type=local,dest=/tmp/.buildx-cache-new \
-            -t ghcr.io/jaykeegan/api:latest \
+            -t ghcr.io/jaykeegan/unas_pro_exporter:latest \
             -f ./docker/Dockerfile \
             --load .
 
@@ -61,17 +61,4 @@ jobs:
 
       - name: Push Docker Image
         run: |
-          docker push ghcr.io/jaykeegan/api:latest
-
-      - name: Deploy via SSH
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          port: ${{ secrets.SSH_PORT }}
-          script: | # docker stop japi && docker rm japi && docker pull ghcr.io/jaykeegan/api:latest && docker run -d --name japi -p 1564:3000 --env-file ~/envs/japi.env --restart always ghcr.io/jaykeegan/api:latest
-            docker stop japi
-            docker rm japi
-            docker pull ghcr.io/jaykeegan/api:latest
-            docker run -d --name japi -p 1564:3000 --env-file ~/envs/japi.env --restart always ghcr.io/jaykeegan/api:latest
+          docker push ghcr.io/jaykeegan/unas_pro_exporter:latest
