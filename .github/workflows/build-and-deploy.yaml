@@ -51,14 +51,10 @@ jobs:
             --cache-to type=local,dest=/tmp/.buildx-cache-new \
             -t ghcr.io/jaykeegan/unas_pro_exporter:latest \
             -f ./docker/Dockerfile \
-            --load .
+            --push .
 
       - name: Update cache
         if: success()
         run: |
           rm -rf /tmp/.buildx-cache
           mv /tmp/.buildx-cache-new /tmp/.buildx-cache
-
-      - name: Push Docker Image
-        run: |
-          docker push ghcr.io/jaykeegan/unas_pro_exporter:latest
