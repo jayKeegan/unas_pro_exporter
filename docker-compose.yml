@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   unaspro_exporter:
-    build: ghcr.io/jaykeegan/unas_pro_exporter:latest
+    image: ghcr.io/jaykeegan/unas_pro_exporter:latest
     ports:
       - "9101:9101"
     environment:
